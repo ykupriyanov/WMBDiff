@@ -1,0 +1,12 @@
+.svn
+/WMBDiff#home.bat
+/WMBDiff.log
+/WMBDiff.xls
+/Readme#temp.txt
+/target/archive-tmp
+/target/classes
+/target/maven-archiver
+/target/surefire-reports
+/target/test-classes
+/target/wmbdiff-1.0.0.jar
+/config#.xml

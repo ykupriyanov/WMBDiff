@@ -1,0 +1,23 @@
+WMBDiff
+Copyright 2015 Yaroslav Kupriyanov
+
+This product includes/uses software developed at 
+The Apache Software Foundation (http://www.apache.org/).
+	Apache xercesImpl 2.9.1 
+	Apache POI 
+
+This product includes/uses software developed by the JGoodies project (http://jgoodies.com/). JGoodies License (BSD)
+
+This product includes/uses software, Logback  (http://logback.qos.ch/),
+developed by QOS.ch (http://www.qos.ch/)
+License: Eclipse Public License v1.0 (http://www.eclipse.org/legal/epl-v10.html) 
+         or (per the licensee's choosing)  
+         GNU Lesser General Public License, version 2.1 (http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)
+
+This product includes/uses software, SLF4J  (http://www.slf4j.org/),
+developed by QOS.ch (http://www.qos.ch/)
+License: MIT License (http://www.slf4j.org/license.html)
+
+This product includes/uses software, SwingX: swingx-all-1.6.4.jar
+GNU LESSER GENERAL PUBLIC LICENSE 2.1 (LGPL 2.1)
+

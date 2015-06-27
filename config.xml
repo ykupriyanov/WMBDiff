@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Remote Brokers</comment>
+<entry key="BHost">Broker2Host</entry>
+<entry key="APort">1414</entry>
+<entry key="BMqMgr">Broker2MQMgr</entry>
+<entry key="AMqMgr">Broker1MQMgr</entry>
+<entry key="AHost">Broker1Host</entry>
+<entry key="TEMP_EG_SUFFIX">_TEMP</entry>
+<entry key="BPort">1414</entry>
+</properties>
