@@ -10,3 +10,4 @@
 /target/test-classes
 /target/wmbdiff-1.0.0.jar
 /config#.xml
+/config.xml
