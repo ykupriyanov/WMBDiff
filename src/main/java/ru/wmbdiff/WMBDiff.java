@@ -48,9 +48,6 @@ import javax.swing.JTextArea;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.TableModel;
-
-import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.JXTreeTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,13 +58,12 @@ import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.ibm.broker.config.proxy.ConfigManagerProxyLoggedException;
 import com.ibm.broker.config.proxy.ConfigManagerProxyPropertyNotInitializedException;
-import com.ibm.broker.config.proxy.DeployedObject;
 
 public class WMBDiff {
 	final static Logger logger = LoggerFactory.getLogger(WMBDiff.class);
 	private JFrame frame;
 	private JTextArea textAreaDiffMain;
-	private JXTable tableDiff;
+	private UITableDiff tableDiff;
 	private JToggleButton btnShowOnlyInAButton, btnShowOnlyInBButton,
 					      btnShowOnlyEqualButton, btnShowOnlyDiffButton;
 	
@@ -108,23 +104,20 @@ public class WMBDiff {
 		saveConfig();
 		try {
 			mc = new ModelCreator(connectDialog.getABroker(), connectDialog.getBBroker(), config.getProperty("TEMP_EG_SUFFIX"));
-			mc.setModelFilter(true, true, true, true);
+			mc.setModelFilter(btnShowOnlyInAButton.isSelected(),
+					btnShowOnlyInBButton.isSelected(),
+					btnShowOnlyEqualButton.isSelected(),
+					btnShowOnlyDiffButton.isSelected());
 			updateTreeTable();
 			updateAreaDiffMain();
+			tableDiff.setEmpty();
 		} catch (ConfigManagerProxyPropertyNotInitializedException e) {
 			logger.error("Connect to broker Error", e);
 		} catch (ConfigManagerProxyLoggedException e) {
 			logger.error("Connect to broker Error", e);
 		}
 	}
-	private String timestampToString(Date date) {
-		 if( date == null) {
-			 return null;
-		 } else {
-			 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			 return dateFormat.format(date);
-		 }
-	}
+
 	private void saveConfig(){
 		File file = new File(configFile);
 	try {
@@ -324,61 +317,12 @@ public class WMBDiff {
         setTreeTableWidth();
         treeTable.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
             public void valueChanged(ListSelectionEvent event) {
-                // do some actions here, for example
-                // print first column value from selected row
-               try{
                Object o =  treeTable.getModel().getValueAt(treeTable.getSelectedRow(), 4);
                if(o != null && o instanceof DiffDeployedObjectResult) {
             	   DiffDeployedObjectResult result = (DiffDeployedObjectResult) o;
-            	   TableModel tm = tableDiff.getModel();
-            	   DeployedObject a, b;
-            	   switch(result.getResult()){
-            	   case DIFF:
-            	   case EQUAL:
-            		   a = result.getAObject();
-            		   b = result.getBObject();
-            		   addRow(tm,"A", 0, a);
-            		   addRow(tm,"B", 1, b);
-            		   break;
-            	   case ONLY_IN_A:
-            		   a = result.getAObject();
-            		   addRow(tm,"A", 0, a);
-            		   addRowEmpty(tm,"B",1);
-            		   break;
-            	   case ONLY_IN_B:
-            		   b = result.getBObject();
-            		   addRowEmpty(tm,"A",0);
-            		   addRow(tm,"B", 1, b);
-            		   break;
-            	   }
-               	   tableDiff.packAll();
-            	   tableDiff.updateUI();    		
-                 }
-               } catch (ConfigManagerProxyPropertyNotInitializedException e) {
-					logger.error("Update tableDiff Error", e);
-				} catch (ConfigManagerProxyLoggedException e) {
-					logger.error("Update tableDiff Error", e);
-				}
-            }
-            private void addRowEmpty(TableModel tm, String broker, int row){
-               tm.setValueAt(broker, row, 0);
-          	   tm.setValueAt("",     row, 1);
-          	   tm.setValueAt("",     row, 2);
-          	   tm.setValueAt("",     row, 3);	  
-          	   tm.setValueAt("",     row, 4);
-          	   tm.setValueAt("",     row, 5);
-          	   tm.setValueAt("",     row, 6);
-            }
-            private void addRow(TableModel tm, String broker, int row, DeployedObject o) throws ConfigManagerProxyPropertyNotInitializedException, ConfigManagerProxyLoggedException{
-               tm.setValueAt(broker, row, 0);
-       		   tm.setValueAt(o.getExecutionGroup().getName(), row, 1);
-       		   tm.setValueAt(o.getName(), row, 2);
-       		   tm.setValueAt(o.getFileExtension(), row, 3);	  
-       		   tm.setValueAt(timestampToString(o.getModifyTime()), row, 4);
-       		   tm.setValueAt(timestampToString(o.getDeployTime()), row, 5);
-       		   tm.setValueAt(o.getBARFileName(), row, 6);
-            }
-        });
+            	   tableDiff.update(result);
+               };
+            }});
       JScrollPane scrollPane_2 = new JScrollPane();
       scrollPane_2.setViewportView(treeTable);
       builder.add(scrollPane_2, cc.xywh(1, 3, 1, 3));
@@ -391,39 +335,11 @@ public class WMBDiff {
       textAreaDiffMain.setBackground(frame.getBackground());
       textAreaDiffMain.setEditable(false);
       builder.add(textAreaDiffMain, cc.xy(3, 3));
-      String[] tableColumnNames = {
-                       "Broker",
-                       "EG Name",
-                       "Name",
-                       "Type",
-                       "Last Modificaton",
-                       "Deployment Date",
-                       "Bar File"};
-              
-      String[][] tableData = {
-            		 {"", "", "", "" , "", "", ""},
-            		 {"", "", "", "" , "", "", ""}
-            };
-      		
-      tableDiff = new JXTable(tableData, tableColumnNames);
-      tableDiff.setEditable(false);             
-      tableDiff.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-      setTableDiffWidth();
-      //tableDiff.packAll();
+      //ADD TABLE DIFF
+      tableDiff = new UITableDiff();
       JScrollPane scrollPane = new JScrollPane(tableDiff, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
       builder.add(scrollPane, cc.xy(3, 5));
       //END TEXT AREA AND TABLE DIFF
 	
-	}
-
-	private void setTableDiffWidth() {
-	   tableDiff.getColumnModel().getColumn(0).setPreferredWidth(45);
- 	   tableDiff.getColumnModel().getColumn(1).setPreferredWidth(65);
- 	   tableDiff.getColumnModel().getColumn(2).setPreferredWidth(255);
- 	   tableDiff.getColumnModel().getColumn(3).setPreferredWidth(35);
- 	   tableDiff.getColumnModel().getColumn(4).setPreferredWidth(125);
- 	   tableDiff.getColumnModel().getColumn(5).setPreferredWidth(125);
- 	   tableDiff.getColumnModel().getColumn(6).setPreferredWidth(150);
- 	   //for(int i=0; i<7;i++) logger.info("TreeDiff Column="+ Integer.valueOf(i).toString()+ " Width=" + Integer.valueOf(tableDiff.getColumnModel().getColumn(i).getWidth()).toString());
 	}
 }

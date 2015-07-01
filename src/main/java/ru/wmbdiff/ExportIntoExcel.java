@@ -104,7 +104,7 @@ public void export(File file, WMBDiffNoRootTreeTableModel model) {
     cell.setCellValue("Type");
     cell.setCellStyle(style);
     cell = row.createCell(5);
-    cell.setCellValue("Last Modificaton");
+    cell.setCellValue("Last Modification");
     cell.setCellStyle(style);
     cell = row.createCell(6);
     cell.setCellValue("Deployment Date");
